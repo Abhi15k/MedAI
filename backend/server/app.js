@@ -10,7 +10,7 @@ import SummarizeRouter from "./routes/reminder.js";
 
 
 // Config dotenv
-dotenv.config();
+dotenv.config({ path: "backend/server/.env" });
 
 // Database config
 connectDB();
@@ -29,14 +29,14 @@ app.use("/api/reminder", ReminderRouter);
 app.use("/api/predict", PredictionRouter);
 app.use("/api/summarize", SummarizeRouter);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   console.log(`Server Running on ${PORT}`);
 });
 
 // Root endpoint
-app.get("/", (request, response) => {
+app.get("/", (req, res) => {
   response.send("Server is up and running");
 });
 
