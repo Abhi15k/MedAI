@@ -1,7 +1,7 @@
 {
   "name": "medai",
   "scripts": {
-    "client": "npm start --prefix client",
+    "client": "npm run dev --prefix client",
     "server": "nodemon backend/server/app.js",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
