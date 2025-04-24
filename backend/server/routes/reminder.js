@@ -1,27 +1,16 @@
 import express from 'express';
+import createReminder from '../controllers/reminderController/createReminder.js';
+import getAllReminder from '../controllers/reminderController/getAllReminder.js';
+import getRemindersByUserId from '../controllers/reminderController/getReminderById.js';
+import deleteReminder from '../controllers/reminderController/deleteReminder.js';
+import updateReminder from '../controllers/reminderController/updateReminder.js';
 
 const ReminderRouter = express.Router();
 
-// Demo route to get all reminders
-ReminderRouter.get('/', (req, res) => {
-    res.json({ message: 'Get all reminders' });
-});
-
-// Demo route to create a new reminder
-ReminderRouter.post('/', (req, res) => {
-    res.json({ message: 'Create a new reminder' });
-});
-
-// Demo route to update a reminder by ID
-ReminderRouter.put('/:id', (req, res) => {
-    const { id } = req.params;
-    res.json({ message: `Update reminder with ID: ${id}` });
-});
-
-// Demo route to delete a reminder by ID
-ReminderRouter.delete('/:id', (req, res) => {
-    const { id } = req.params;
-    res.json({ message: `Delete reminder with ID: ${id}` });
-});
+ReminderRouter.get('/', getAllReminder);
+ReminderRouter.get('/:id', getRemindersByUserId);
+ReminderRouter.post('/', createReminder);
+ReminderRouter.put('/:id', updateReminder);
+ReminderRouter.delete('/:id', deleteReminder);
 
 export default ReminderRouter;
