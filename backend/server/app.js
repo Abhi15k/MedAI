@@ -9,6 +9,7 @@ import ReminderRouter from "./routes/reminder.js";
 import SummarizeRouter from "./routes/reminder.js";
 import cors from "cors";
 import authRouter from "./routes/authRoute.js";
+import cookieParser from "cookie-parser";
 
 
 // Config dotenv
@@ -23,7 +24,14 @@ const app = express();
 // Middleware setup
 app.use(express.json()); // Middleware for parsing JSON data
 app.use(morgan("dev"));   // Logging middleware
-app.use(cors()); // Enable CORS for all routes
+app.use(cors({
+  origin: "http://localhost:5173", // Allow requests from this origin
+  credentials: true, // Allow credentials
+})); 
+app.use(cookieParser()); // Middleware for parsing cookies
+app.use(express.urlencoded({ extended: true })); // Middleware for parsing URL-encoded data
+
+
 // Routes
 app.use("/api/appointment", AppointmentRouter);
 app.use("/api/reminder", ReminderRouter);

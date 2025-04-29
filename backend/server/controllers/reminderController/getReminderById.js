@@ -7,11 +7,7 @@ export default async function getRemindersByUserId(req, res) {
     }
     try {
         const reminders = await Medicine.find({ userId: id }).exec();
-
-        if (reminders.length === 0) {
-            return res.status(404).json({ message: 'No reminders found for this user' });
-        }
-
+        
         return res.status(200).json(reminders);
     } catch (err) {
         console.error('Error fetching reminders:', err);

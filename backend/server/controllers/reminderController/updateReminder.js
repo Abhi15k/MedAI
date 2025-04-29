@@ -15,11 +15,14 @@ export default async function updateReminder(req, res) {
     }
 
     const { userId, medicine, dosage, time, frequency, startDate, notes } = req.body;
+    const capitalizedMedicine = medicine.charAt(0).toUpperCase() + medicine.slice(1);
+    const capitalizedDosage = dosage.charAt(0).toUpperCase() + dosage.slice(1);
+    const capitalizedNotes = notes.charAt(0).toUpperCase() + notes.slice(1);
     console.log("Received data:", req.body);
     try {
         const updatedReminder = await Medicine.findByIdAndUpdate(
             id,
-            { userId, medicine, dosage, time, frequency, startDate, notes },
+            { userId, medicine: capitalizedMedicine, dosage: capitalizedDosage, time, frequency, startDate, notes: capitalizedNotes },
             { new: true }
         );
 
@@ -27,7 +30,7 @@ export default async function updateReminder(req, res) {
             return res.status(404).json({ message: 'Reminder not found' });
         }
 
-        return res.status(200).json({ message: 'Reminder updated successfully', updatedReminder });
+        return res.status(200).json({ message: "Updated successfully", updatedReminder });
     } catch (err) {
         console.error('Error updating reminder:', err);
         return res.status(500).json({ error: 'Server error' });

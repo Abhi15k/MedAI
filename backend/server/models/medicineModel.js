@@ -33,14 +33,14 @@ const medicineSchema = new mongoose.Schema({
   },
   startDate: {
     type: Date,
-    default: Date.now,
-    required: true
+    required: true,
+    trim: true,
   },
   notes: {
     type: String,
     trim: true,
     maxLength: 100,
-    required: false
+    required: true
   }
 },
   {
