@@ -1,8 +1,10 @@
 import { validationResult } from "express-validator";
 import { registerValidator, loginValidator } from "../../utils/userValidator.js";
 import User from "../../models/userModel.js";
+import { generateAccessToken } from "../../utils/jwtTokenGenerator.js";
 
-export const register = async (req, res) => {
+
+export const signup = async (req, res) => {
     await Promise.all(registerValidator.map(validator => validator.run(req)));
 
     // Check for validation errors
@@ -27,9 +29,10 @@ export const register = async (req, res) => {
             role
         })
 
-        await newUser.save();
+        const savedUser = await newUser.save();
+        const accessToken = generateAccessToken(savedUser);
 
-        res.status(201).json({ message: `User with email ${email} created successfully` });
+        res.status(201).json({ message: `User with email ${email} created successfully`, accessToken, user: savedUser });
     } catch (error) {
         console.error("Error creating user:", error);
         return res.status(500).json({ message: "Internal server error" });
@@ -58,13 +61,15 @@ export const login = async (req, res) => {
 
         const isMatch = await user.comparePassword(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ message: "Invalid Password" });
+            return res.status(401).json({ message: "Invalid Password try again" });
         }
-        
-        const token = 
-        res.status(200).json({ message: `logged in successfully: ${email} ` });
+
+        const accessToken = generateAccessToken(user);
+
+        res.status(200).json({ message: `logged in successfully: ${email} `, accessToken, user });
     } catch (error) {
         console.error("Error logging in user:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 }
+
