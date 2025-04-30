@@ -12,11 +12,11 @@ export default async function createReminder(req, res) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { userId, medicine, dosage, time, frequency, start, notes } = req.body;
+    const { userId, medicine, dosage, time, frequency, startDate, notes } = req.body;
     const capitalizedMedicine = medicine.charAt(0).toUpperCase() + medicine.slice(1);
     const capitalizedDosage = dosage.charAt(0).toUpperCase() + dosage.slice(1);
     const capitalizedNotes = notes.charAt(0).toUpperCase() + notes.slice(1);
-    console.log("Received data:", req.body);
+
 
     try {
         const newReminder = new Medicine({
@@ -25,7 +25,7 @@ export default async function createReminder(req, res) {
             dosage: capitalizedDosage,
             time,
             frequency,
-            startDate: start,
+            startDate,
             notes: capitalizedNotes,
         });
 
