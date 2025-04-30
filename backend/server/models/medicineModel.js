@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { timestamp } from "rxjs";
 
 const medicineSchema = new mongoose.Schema({
   userId: {
@@ -10,19 +11,19 @@ const medicineSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    maxLength: 50 
+    maxLength: 50
   },
   dosage: {
     type: String,
     required: true,
     trim: true,
-    maxLength: 20 
+    maxLength: 20
   },
   time: {
     type: String,
     required: true,
     trim: true,
-    match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/ 
+    match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
   },
   frequency: {
     type: String,
@@ -32,20 +33,21 @@ const medicineSchema = new mongoose.Schema({
   },
   startDate: {
     type: Date,
-    default: Date.now,
-    required: false 
+    required: true,
+    trim: true,
   },
   notes: {
     type: String,
     trim: true,
-    maxLength: 100, 
-    required: false 
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now 
+    maxLength: 100,
+    required: true
   }
-});
+},
+  {
+    timestamps: true
+  }
+
+);
 
 const Medicine = mongoose.model("Medicine", medicineSchema);
 

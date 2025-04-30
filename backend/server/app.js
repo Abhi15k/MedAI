@@ -7,6 +7,9 @@ import AppointmentRouter from "./routes/appointment.js";
 import PredictionRouter from "./routes/prediction.js";
 import ReminderRouter from "./routes/reminder.js";
 import SummarizeRouter from "./routes/reminder.js";
+import cors from "cors";
+import authRouter from "./routes/authRoute.js";
+import cookieParser from "cookie-parser";
 
 
 // Config dotenv
@@ -21,13 +24,20 @@ const app = express();
 // Middleware setup
 app.use(express.json()); // Middleware for parsing JSON data
 app.use(morgan("dev"));   // Logging middleware
-// app.set('trust proxy', true);
+app.use(cors({
+  origin: "http://localhost:5173", // Allow requests from this origin
+  credentials: true, // Allow credentials
+})); 
+app.use(cookieParser()); // Middleware for parsing cookies
+app.use(express.urlencoded({ extended: true })); // Middleware for parsing URL-encoded data
+
 
 // Routes
 app.use("/api/appointment", AppointmentRouter);
 app.use("/api/reminder", ReminderRouter);
 app.use("/api/predict", PredictionRouter);
 app.use("/api/summarize", SummarizeRouter);
+app.use("/api/auth", authRouter);
 
 const PORT = process.env.PORT;
 
