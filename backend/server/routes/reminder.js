@@ -7,6 +7,7 @@ import updateReminder from '../controllers/reminderController/updateReminder.js'
 import { authenticateUser } from '../middleware/auth.js';
 import updateFcmToken from '../controllers/reminderController/updateFcmToken.js';
 
+
 const ReminderRouter = express.Router();
 
 ReminderRouter.get('/', authenticateUser, getAllReminder);

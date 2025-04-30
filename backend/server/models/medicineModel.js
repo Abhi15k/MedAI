@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { calculateNextRunAt } from "../utils/calculateNextRun.js";
 
+
 const medicineSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -48,6 +49,7 @@ const medicineSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
 
 // Auto-calculate nextRunAt before save for scheduling reminders
 medicineSchema.pre('save', function (next) {

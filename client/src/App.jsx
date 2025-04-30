@@ -14,6 +14,7 @@ import Box from '@mui/material/Box';
 import SignUp from "./pages/Home/SignUp";
 import FcmToken from "./components/FcmToken";
 
+
 // Protected route component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -89,7 +90,6 @@ function App() {
         </Routes>
       </Router>
     </>
-
   );
 }
 

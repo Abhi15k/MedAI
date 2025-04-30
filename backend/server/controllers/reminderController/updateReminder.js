@@ -23,7 +23,7 @@ export default async function updateReminder(req, res) {
     try {
         const updatedReminder = await Medicine.findByIdAndUpdate(
             id,
-            { userId, medicine: capitalizedMedicine, dosage: capitalizedDosage, time, frequency, startDate, notes: capitalizedNotes, nextRunAt: nextRunAt },
+            { userId, medicine: capitalizedMedicine, dosage: capitalizedDosage, time, frequency, startDate, notes: capitalizedNotes, nextRunAt: nextRunAt }
             { new: true }
         );
 

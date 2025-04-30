@@ -58,6 +58,7 @@ export default function ReminderDialog({
     // Format date for the input field (YYYY-MM-DD)
     const formatDateForInput = (dateString) => {
         if (!dateString) return '';
+
         const date = new Date(dateString);
         return date.toISOString().split('T')[0];
     };

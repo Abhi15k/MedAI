@@ -17,6 +17,7 @@ export default async function createReminder(req, res) {
     const capitalizedDosage = dosage.charAt(0).toUpperCase() + dosage.slice(1);
     const capitalizedNotes = notes.charAt(0).toUpperCase() + notes.slice(1);
 
+
     try {
         const newReminder = new Medicine({
             userId,
@@ -29,6 +30,7 @@ export default async function createReminder(req, res) {
         });
 
         const savedReminder = await newReminder.save();
+        console.log("Saved Reminder:", savedReminder);
         return res.status(201).json(savedReminder);
     } catch (err) {
         console.error("Error saving reminder:", err);
