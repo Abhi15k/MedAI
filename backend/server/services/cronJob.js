@@ -22,7 +22,11 @@ const processReminder = async (reminder) => {
             name: user.name || 'User',
             medicine: reminder.medicine,
             dosage: reminder.dosage,
-            time: reminder.time,
+            time: new Date(`1970-01-01T${reminder.time}`).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            }),
         });
 
         if (user.fcmToken) {
@@ -31,7 +35,11 @@ const processReminder = async (reminder) => {
                 user.name || 'User',
                 reminder.medicine,
                 reminder.dosage,
-                reminder.time,
+                new Date(`1970-01-01T${reminder.time}`).toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                }),
             );
         }
         // Update next run time and save

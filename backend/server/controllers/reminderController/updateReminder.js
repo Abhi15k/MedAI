@@ -20,7 +20,6 @@ export default async function updateReminder(req, res) {
     const capitalizedDosage = dosage.charAt(0).toUpperCase() + dosage.slice(1);
     const capitalizedNotes = notes.charAt(0).toUpperCase() + notes.slice(1);
     const nextRunAt = calculateNextRunAt(startDate, time, frequency);
-    console.log("Received data:", req.body);
     try {
         const updatedReminder = await Medicine.findByIdAndUpdate(
             id,
