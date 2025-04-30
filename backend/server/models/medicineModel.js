@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import { timestamp } from "rxjs";
+import { calculateNextRunAt } from "../utils/calculateNextRun.js";
 
 const medicineSchema = new mongoose.Schema({
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
-    trim: true,
   },
   medicine: {
     type: String,
@@ -41,14 +41,21 @@ const medicineSchema = new mongoose.Schema({
     trim: true,
     maxLength: 100,
     required: true
+  },
+  nextRunAt: {
+    type: Date,
   }
-},
-  {
-    timestamps: true
-  }
+}, {
+  timestamps: true
+});
 
-);
+// Auto-calculate nextRunAt before save for scheduling reminders
+medicineSchema.pre('save', function (next) {
+  if (!this.nextRunAt) {
+    this.nextRunAt = calculateNextRunAt(this.startDate, this.time, this.frequency);
+  }
+  next();
+});
 
 const Medicine = mongoose.model("Medicine", medicineSchema);
-
-export default Medicine; 
+export default Medicine;

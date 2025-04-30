@@ -12,4 +12,5 @@ authRoute.get('/me', authenticateUser, (req, res) => {
 
 
 
+
 export default authRoute;

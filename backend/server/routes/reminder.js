@@ -5,6 +5,7 @@ import getRemindersByUserId from '../controllers/reminderController/getReminderB
 import deleteReminder from '../controllers/reminderController/deleteReminder.js';
 import updateReminder from '../controllers/reminderController/updateReminder.js';
 import { authenticateUser } from '../middleware/auth.js';
+import updateFcmToken from '../controllers/reminderController/updateFcmToken.js';
 
 const ReminderRouter = express.Router();
 
@@ -13,5 +14,6 @@ ReminderRouter.get('/:id', authenticateUser, getRemindersByUserId);
 ReminderRouter.post('/', authenticateUser, createReminder);
 ReminderRouter.put('/:id', authenticateUser, updateReminder);
 ReminderRouter.delete('/:id', authenticateUser, deleteReminder);
+ReminderRouter.post('/fcm-token', authenticateUser, updateFcmToken);
 
 export default ReminderRouter;

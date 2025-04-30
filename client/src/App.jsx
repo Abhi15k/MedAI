@@ -12,6 +12,7 @@ import { useContext } from "react";
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import SignUp from "./pages/Home/SignUp";
+import FcmToken from "./components/FcmToken";
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -19,9 +20,11 @@ const ProtectedRoute = ({ children }) => {
 
   // Show loading state or spinner while authentication state is being determined
   if (loading) {
-    return <Box color={"#ffffff"} sx={{ display: 'flex' }}>
-      <CircularProgress />
-    </Box>;
+    return <div className="flex justify-center items-center min-h-screen">
+      <Box sx={{ display: 'flex' }}>
+        <CircularProgress />
+      </Box>
+    </div>;
   }
 
   // Redirect to login if user is not authenticated
@@ -37,52 +40,56 @@ function App() {
   const { user } = useContext(AuthContext);
 
   return (
-    <Router>
-      <ToastContainer />
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={user ? <Navigate to="/" replace /> : <SignUp />} />
-        <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
+    <>
+    <ToastContainer />
+    {user && <FcmToken />}
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={user ? <Navigate to="/" replace /> : <SignUp />} />
+          <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
 
-        {/* Protected routes */}
-        <Route
-          path="/appointment"
-          element={
-            <ProtectedRoute>
-              <Appointment />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/reminder"
-          element={
-            <ProtectedRoute>
-              <Reminder />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/prediction"
-          element={
-            <ProtectedRoute>
-              <Prediction />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/summarizer"
-          element={
-            <ProtectedRoute>
-              <Summarizer />
-            </ProtectedRoute>
-          }
-        />
+          {/* Protected routes */}
+          <Route
+            path="/appointment"
+            element={
+              <ProtectedRoute>
+                <Appointment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reminder"
+            element={
+              <ProtectedRoute>
+                <Reminder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/prediction"
+            element={
+              <ProtectedRoute>
+                <Prediction />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/summarizer"
+            element={
+              <ProtectedRoute>
+                <Summarizer />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Catch all route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
+          {/* Catch all route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </>
+
   );
 }
 
