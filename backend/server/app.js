@@ -10,7 +10,7 @@ import SummarizeRouter from "./routes/reminder.js";
 import cors from "cors";
 import authRouter from "./routes/authRoute.js";
 import cookieParser from "cookie-parser";
-
+import './services/cronJob.js';
 
 // Config dotenv
 dotenv.config({ path: "backend/server/.env" });

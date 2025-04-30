@@ -10,6 +10,4 @@ authRoute.get('/me', authenticateUser, (req, res) => {
     res.status(200).json({ user: req.user });
 });
 
-
-
 export default authRoute;

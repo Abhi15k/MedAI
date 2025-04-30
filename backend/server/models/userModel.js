@@ -22,8 +22,14 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['patient', 'doctor', 'admin'],
-        default: 'patient'
-    }
+        default: 'patient',
+        required: true
+    },
+    fcmToken: {
+        type: String,
+        default: null
+    },  
+
 }, {
     timestamps: true
 });
