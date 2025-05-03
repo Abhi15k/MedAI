@@ -1,0 +1,335 @@
+.appointment-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 2rem;
+}
+
+.tabs button {
+    background: none;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    position: relative;
+    color: #666;
+    font-weight: 500;
+}
+
+.tabs button.active {
+    color: #2c7be5;
+}
+
+.tabs button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: #2c7be5;
+}
+
+.tab-content {
+    min-height: 400px;
+}
+
+/* Book Appointment Styles */
+.search-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #555;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.search-filters button {
+    padding: 0.75rem 1.5rem;
+    background-color: #2c7be5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.search-filters button:hover {
+    background-color: #1a68d1;
+}
+
+.doctors-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.doctor-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.doctor-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 1rem;
+    border: 2px solid #f0f0f0;
+}
+
+.doctor-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.doctor-details h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+}
+
+.doctor-details p {
+    margin: 0 0 0.25rem 0;
+    color: #666;
+}
+
+.specialty {
+    font-weight: 500;
+    color: #2c7be5 !important;
+}
+
+.book-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #2c7be5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.book-btn:hover {
+    background-color: #1a68d1;
+}
+
+/* Appointments List Styles */
+.appointments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.appointment-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: box-shadow 0.2s;
+}
+
+.appointment-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.appointment-date h3 {
+    margin: 0 0 0.25rem 0;
+    color: #333;
+}
+
+.appointment-date p {
+    margin: 0;
+    color: #666;
+}
+
+.appointment-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.appointment-status.pending {
+    background-color: #fff8e1;
+    color: #f57c00;
+}
+
+.appointment-status.accepted {
+    background-color: #e8f5e9;
+    color: #388e3c;
+}
+
+.appointment-status.rejected {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.appointment-status.cancelled {
+    background-color: #f5f5f5;
+    color: #757575;
+}
+
+.appointment-body {
+    margin-bottom: 1.5rem;
+}
+
+.doctor-info,
+.patient-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.doctor-info img,
+.patient-info img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+    border: 2px solid #f0f0f0;
+}
+
+.doctor-info h4,
+.patient-info h4 {
+    margin: 0 0 0.25rem 0;
+    color: #333;
+}
+
+.doctor-info p,
+.patient-info p {
+    margin: 0;
+    color: #666;
+}
+
+.appointment-reason {
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-top: 1rem;
+}
+
+.appointment-reason p {
+    margin: 0;
+    color: #555;
+}
+
+.appointment-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.view-btn,
+.cancel-btn,
+.accept-btn,
+.reject-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+}
+
+.view-btn {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.view-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.cancel-btn {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.cancel-btn:hover {
+    background-color: #ffcdd2;
+}
+
+.accept-btn {
+    background-color: #e8f5e9;
+    color: #388e3c;
+}
+
+.accept-btn:hover {
+    background-color: #c8e6c9;
+}
+
+.reject-btn {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.reject-btn:hover {
+    background-color: #ffcdd2;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.error {
+    background-color: #ffebee;
+    color: #d32f2f;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1.5rem;
+}

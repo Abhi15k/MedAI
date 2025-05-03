@@ -6,7 +6,7 @@ import connectDB from "./config/db.js";
 import AppointmentRouter from "./routes/appointment.js";
 import PredictionRouter from "./routes/prediction.js";
 import ReminderRouter from "./routes/reminder.js";
-import SummarizeRouter from "./routes/reminder.js";
+import SummarizeRouter from "./routes/summarizer.js";
 
 
 // Config dotenv
@@ -37,7 +37,7 @@ app.listen(PORT, () => {
 
 // Root endpoint
 app.get("/", (req, res) => {
-  response.send("Server is up and running");
+  res.send("Server is up and running");
 });
 
 export default app;

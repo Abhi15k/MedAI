@@ -1,125 +1,42 @@
 import express from 'express';
 import { authenticateUser, authorizeRoles } from '../middleware/auth.js';
+import { getDoctors } from '../controllers/appointmentController/getDoctors.js';
+import { getDoctorAvailability } from '../controllers/appointmentController/getDoctorAvailability.js';
+import { createAppointment } from '../controllers/appointmentController/createAppointment.js';
+import { getPatientAppointments } from '../controllers/appointmentController/getPatientAppointments.js';
+import { getDoctorAppointments } from '../controllers/appointmentController/getDoctorAppointments.js';
+import { updateAppointmentStatus } from '../controllers/appointmentController/updateAppointmentStatus.js';
+import Appointment from '../models/appointmentModel.js';
 
 const AppointmentRouter = express.Router();
 
 // Get all doctors with optional specialty filter
-AppointmentRouter.get('/doctors', async (req, res) => {
-    try {
-        const { specialty, name, date } = req.query;
-
-        // Add logic to fetch doctors by specialty, name, or availability
-        // This should be handled by a controller
-
-        res.status(200).json({
-            success: true,
-            message: 'Doctors retrieved successfully',
-            data: {} // Replace with actual doctor data
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching doctors',
-            error: error.message
-        });
-    }
-});
+AppointmentRouter.get('/doctors', getDoctors);
 
 // Get doctor availability slots
-AppointmentRouter.get('/doctors/:id/availability', async (req, res) => {
-    try {
-        const { date } = req.query;
-        const { id } = req.params;
-
-        // Add logic to fetch doctor's available time slots
-
-        res.status(200).json({
-            success: true,
-            message: 'Availability retrieved successfully',
-            data: {} // Replace with availability data
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching availability',
-            error: error.message
-        });
-    }
-});
+AppointmentRouter.get('/doctors/:id/availability', getDoctorAvailability);
 
 // Book a new appointment
-AppointmentRouter.post('/appointments', authenticateUser, async (req, res) => {
-    try {
-        const { doctorId, date, timeSlot, reason } = req.body;
-        const patientId = req.user.id; // Assuming auth middleware adds user to req
-
-        // Add logic to create appointment
-
-        res.status(201).json({
-            success: true,
-            message: 'Appointment booked successfully',
-            data: {} // Replace with appointment data
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error booking appointment',
-            error: error.message
-        });
-    }
-});
+AppointmentRouter.post('/appointments', authenticateUser, createAppointment);
 
 // Get patient's appointments
-AppointmentRouter.get('/appointments/patient', authenticateUser, async (req, res) => {
-    try {
-        const patientId = req.user.id;
-
-        // Add logic to fetch patient appointments
-
-        res.status(200).json({
-            success: true,
-            message: 'Appointments retrieved successfully',
-            data: [] // Replace with appointments data
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching appointments',
-            error: error.message
-        });
-    }
-});
+AppointmentRouter.get('/appointments/patient', authenticateUser, getPatientAppointments);
 
 // Get doctor's appointments
-AppointmentRouter.get('/appointments/doctor', authenticateUser, authorizeRoles(['doctor']), async (req, res) => {
-    try {
-        const doctorId = req.user.id;
-
-        // Add logic to fetch doctor appointments
-
-        res.status(200).json({
-            success: true,
-            message: 'Appointments retrieved successfully',
-            data: [] // Replace with appointments data
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching appointments',
-            error: error.message
-        });
-    }
-});
+AppointmentRouter.get('/appointments/doctor', authenticateUser, authorizeRoles(['doctor']), getDoctorAppointments);
 
 // Get all appointments (admin only)
 AppointmentRouter.get('/appointments', authenticateUser, authorizeRoles(['admin']), async (req, res) => {
     try {
-        // Add logic to fetch all appointments
+        const appointments = await Appointment.find()
+            .populate('doctor', 'name email doctorProfile.specialization')
+            .populate('patient', 'name email')
+            .sort({ date: -1, timeSlot: 1 });
 
         res.status(200).json({
             success: true,
             message: 'Appointments retrieved successfully',
-            data: [] // Replace with appointments data
+            data: appointments
         });
     } catch (error) {
         res.status(500).json({
@@ -131,40 +48,42 @@ AppointmentRouter.get('/appointments', authenticateUser, authorizeRoles(['admin'
 });
 
 // Accept or reject appointment
-AppointmentRouter.patch('/appointments/:id/status', authenticateUser, authorizeRoles(['doctor', 'admin']), async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { status, note } = req.body; // status: 'accepted', 'rejected'
-
-        // Add logic to update appointment status
-
-        res.status(200).json({
-            success: true,
-            message: `Appointment ${status} successfully`,
-            data: {} // Replace with updated appointment data
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error updating appointment status',
-            error: error.message
-        });
-    }
-});
+AppointmentRouter.patch('/appointments/:id/status', authenticateUser, authorizeRoles(['doctor', 'admin']), updateAppointmentStatus);
 
 // Get specific appointment details
 AppointmentRouter.get('/appointments/:id', authenticateUser, async (req, res) => {
     try {
         const { id } = req.params;
+        const appointment = await Appointment.findById(id)
+            .populate('doctor', 'name email doctorProfile.specialization profileImage')
+            .populate('patient', 'name email patientProfile profileImage');
 
-        // Add logic to fetch specific appointment
-        // Also add authorization check - patient can only see their own appointments,
-        // doctors can only see appointments assigned to them, admins can see all
+        if (!appointment) {
+            return res.status(404).json({
+                success: false,
+                message: 'Appointment not found'
+            });
+        }
+
+        // Authorization check
+        const userId = req.user.id;
+        const userRole = req.user.role;
+
+        if (
+            userRole !== 'admin' &&
+            appointment.doctor._id.toString() !== userId &&
+            appointment.patient._id.toString() !== userId
+        ) {
+            return res.status(403).json({
+                success: false,
+                message: 'Not authorized to view this appointment'
+            });
+        }
 
         res.status(200).json({
             success: true,
             message: 'Appointment retrieved successfully',
-            data: {} // Replace with appointment data
+            data: appointment
         });
     } catch (error) {
         res.status(500).json({
@@ -179,9 +98,29 @@ AppointmentRouter.get('/appointments/:id', authenticateUser, async (req, res) =>
 AppointmentRouter.delete('/appointments/:id', authenticateUser, async (req, res) => {
     try {
         const { id } = req.params;
+        const appointment = await Appointment.findById(id);
 
-        // Add logic to cancel appointment
-        // Also add authorization check
+        if (!appointment) {
+            return res.status(404).json({
+                success: false,
+                message: 'Appointment not found'
+            });
+        }
+
+        // Authorization check (only patient who booked or admin can cancel)
+        const userId = req.user.id;
+        const userRole = req.user.role;
+
+        if (userRole !== 'admin' && appointment.patient.toString() !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: 'Not authorized to cancel this appointment'
+            });
+        }
+
+        // Update status to cancelled
+        appointment.status = 'cancelled';
+        await appointment.save();
 
         res.status(200).json({
             success: true,
