@@ -5,7 +5,6 @@ import Reminder from "./pages/Reminder/Reminder";
 import Prediction from "./pages/Prediction/Prediction";
 import Summarizer from "./pages/Summarizer/Summarizer";
 
-
 function App() {
   return (
     <Router>

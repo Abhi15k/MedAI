@@ -3,28 +3,38 @@
   "scripts": {
     "client": "npm run dev --prefix client",
     "server": "nodemon backend/server/app.js",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "npm run dev"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.5"
   },
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
     "ansi-regex": "^5.0.1",
     "ansi-styles": "^4.3.0",
+    "axios": "^1.9.0",
     "chalk": "^4.1.2",
     "cliui": "^8.0.1",
     "color-convert": "^2.0.1",
     "color-name": "^1.1.4",
     "date-fns": "^2.30.0",
+    "dotenv": "^16.5.0",
     "emoji-regex": "^8.0.0",
     "escalade": "^3.2.0",
     "get-caller-file": "^2.0.5",
     "has-flag": "^4.0.0",
     "is-fullwidth-code-point": "^3.0.0",
     "lodash": "^4.17.21",
+    "multer": "^1.4.5-lts.2",
+    "node-summarizer": "^1.0.7",
     "nodemon": "^3.1.10",
+    "pdf-parse": "^1.1.1",
+    "react-router-dom": "^7.5.3",
     "regenerator-runtime": "^0.14.1",
     "require-directory": "^2.1.1",
     "rxjs": "^7.8.2",

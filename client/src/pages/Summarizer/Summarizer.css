@@ -1,0 +1,52 @@
+.summarizer-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.summarizer-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.summarizer-container form {
+    margin-bottom: 20px;
+}
+
+.summarizer-container input[type="file"] {
+    margin-bottom: 10px;
+}
+
+.summarizer-container button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.summarizer-container button:hover {
+    background-color: #0056b3;
+}
+
+.error {
+    color: red;
+    margin-top: 10px;
+}
+
+.summary {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.summary h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.summary p {
+    line-height: 1.6;
+}
