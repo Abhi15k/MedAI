@@ -7,10 +7,13 @@ import connectDB from "./config/db.js";
 import AppointmentRouter from "./routes/appointment.js";
 import PredictionRouter from "./routes/prediction.js";
 import ReminderRouter from "./routes/reminder.js";
-import SummarizeRouter from "./routes/reminder.js";
+import SummarizeRouter from "./routes/summarizer.js";
 import mongoose from "mongoose";
 import { fileURLToPath } from 'url';
 import path from 'path';
+import authRouter from "./routes/authRoute.js";
+import cookieParser from "cookie-parser";
+import './services/cronJob.js';
 
 // Resolve __dirname for ES module compatibility
 const __filename = fileURLToPath(import.meta.url);
@@ -37,18 +40,23 @@ connectDB();
 const app = express();
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", // Allow requests from this origin
+  credentials: true, // Allow credentials
+}));
 
 // Middleware setup
-app.use('/api/summarize', SummarizeRouter); // Ensure multer middleware handles multipart/form-data before express.json()
 app.use(express.json()); // Middleware for parsing JSON data
 app.use(morgan("dev"));   // Logging middleware
-// app.set('trust proxy', true);
+app.use(cookieParser()); // Middleware for parsing cookies
+app.use(express.urlencoded({ extended: true })); // Middleware for parsing URL-encoded data
 
 // Routes
 app.use("/api/appointment", AppointmentRouter);
 app.use("/api/reminder", ReminderRouter);
 app.use("/api/predict", PredictionRouter);
+app.use("/api/summarize", SummarizeRouter);
+app.use("/api/auth", authRouter);
 
 const PORT = process.env.PORT;
 
@@ -58,7 +66,7 @@ app.listen(PORT, () => {
 
 // Root endpoint
 app.get("/", (req, res) => {
-  response.send("Server is up and running");
+  res.send("Server is up and running");
 });
 
 export default app;
