@@ -1,6 +1,9 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { useContext } from 'react'
+import { AuthContext } from '../contexts/authContext';
 
 export default function DropDown() {
+  const {logout} = useContext(AuthContext);
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
@@ -45,12 +48,12 @@ export default function DropDown() {
        
         <div className="py-1">
           <MenuItem>
-            <a
-              href="#"
-              className="block px-4 py-2 text-sm text-blue-950 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+            <button
+              onClick={logout}
+              className="block text-left w-full px-4 py-2 text-sm text-red-600 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
             >
               Logout
-            </a>
+            </button>
           </MenuItem>
         </div>
       </MenuItems>
