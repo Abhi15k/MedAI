@@ -1,105 +1,107 @@
-import User from '../../models/user.js';
+import Doctor from '../../models/doctorModel.js';
 import Appointment from '../../models/appointmentModel.js';
 
-// Get doctor availability slots
 export const getDoctorAvailability = async (req, res) => {
     try {
         const { id } = req.params;
         const { date } = req.query;
 
-        if (!date) {
+        if (!id || !date) {
             return res.status(400).json({
                 success: false,
-                message: 'Date is required'
+                message: 'Doctor ID and date are required'
             });
         }
 
-        // Find doctor
-        const doctor = await User.findById(id);
+        // Parse the requested date
+        const requestedDate = new Date(date);
+        // Get lowercase day name (monday, tuesday, etc.) to match our schema
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const dayOfWeek = days[requestedDate.getDay()];
 
-        if (!doctor || doctor.role !== 'doctor') {
+        // Get doctor's regular availability for that day
+        const doctor = await Doctor.findById(id);
+        if (!doctor) {
             return res.status(404).json({
                 success: false,
                 message: 'Doctor not found'
             });
         }
 
-        // Get doctor's availability schedule
-        const requestedDate = new Date(date);
-        const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][requestedDate.getDay()];
-
-        // Find the schedule for the requested day
-        const daySchedule = doctor.doctorProfile.availabilitySchedule.find(
-            schedule => schedule.day.toLowerCase() === dayOfWeek.toLowerCase()
-        );
-
-        if (!daySchedule) {
+        // Get doctor's scheduled availability for that day
+        const doctorAvailability = doctor.availability[dayOfWeek] || [];
+        if (doctorAvailability.length === 0) {
             return res.status(200).json({
                 success: true,
                 message: 'Doctor is not available on this day',
-                data: { available: false, slots: [] }
+                data: []
             });
         }
 
-        // Generate time slots (30 min increments)
-        const slots = generateTimeSlots(daySchedule.startTime, daySchedule.endTime);
+        // Get existing appointments for that day
+        const startOfDay = new Date(requestedDate);
+        startOfDay.setHours(0, 0, 0, 0);
 
-        // Find existing appointments for this doctor on this date
-        const startOfDay = new Date(requestedDate.setHours(0, 0, 0, 0));
-        const endOfDay = new Date(requestedDate.setHours(23, 59, 59, 999));
+        const endOfDay = new Date(requestedDate);
+        endOfDay.setHours(23, 59, 59, 999);
 
-        const existingAppointments = await Appointment.find({
-            doctor: id,
-            date: { $gte: startOfDay, $lte: endOfDay },
-            status: { $in: ['pending', 'accepted'] }
+        const bookedAppointments = await Appointment.find({
+            doctorId: id,
+            date: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            },
+            status: { $nin: ['cancelled', 'rejected'] }
         });
 
-        // Filter out already booked slots
-        const bookedSlots = existingAppointments.map(appointment => appointment.timeSlot);
-        const availableSlots = slots.filter(slot => !bookedSlots.includes(slot));
+        // Create available time slots (30-minute intervals)
+        const availableSlots = [];
+
+        doctorAvailability.forEach(slot => {
+            const [startHour, startMinute] = slot.startTime.split(':').map(Number);
+            const [endHour, endMinute] = slot.endTime.split(':').map(Number);
+
+            let currentTime = startHour * 60 + startMinute;
+            const endTime = endHour * 60 + endMinute;
+
+            // Create 30-minute slots
+            while (currentTime + 30 <= endTime) {
+                const slotStartHour = Math.floor(currentTime / 60);
+                const slotStartMinute = currentTime % 60;
+
+                const slotEndHour = Math.floor((currentTime + 30) / 60);
+                const slotEndMinute = (currentTime + 30) % 60;
+
+                const startTimeString = `${slotStartHour.toString().padStart(2, '0')}:${slotStartMinute.toString().padStart(2, '0')}`;
+                const endTimeString = `${slotEndHour.toString().padStart(2, '0')}:${slotEndMinute.toString().padStart(2, '0')}`;
+
+                // Check if this slot is already booked
+                const isBooked = bookedAppointments.some(appointment =>
+                    appointment.timeSlot.startTime === startTimeString
+                );
+
+                if (!isBooked) {
+                    availableSlots.push({
+                        startTime: startTimeString,
+                        endTime: endTimeString
+                    });
+                }
+
+                currentTime += 30; // Move to next 30-minute slot
+            }
+        });
 
         res.status(200).json({
             success: true,
-            message: 'Availability retrieved successfully',
-            data: {
-                available: availableSlots.length > 0,
-                slots: availableSlots
-            }
+            data: availableSlots
         });
+
     } catch (error) {
+        console.error('Error fetching doctor availability:', error);
         res.status(500).json({
             success: false,
-            message: 'Error fetching availability',
+            message: 'Error fetching doctor availability',
             error: error.message
         });
     }
 };
-
-// Helper function to generate time slots
-function generateTimeSlots(startTime, endTime) {
-    const slots = [];
-    const [startHour, startMinute] = startTime.split(':').map(Number);
-    const [endHour, endMinute] = endTime.split(':').map(Number);
-
-    let currentHour = startHour;
-    let currentMinute = startMinute;
-
-    while (
-        currentHour < endHour ||
-        (currentHour === endHour && currentMinute < endMinute)
-    ) {
-        // Format the current time as HH:MM
-        const formattedHour = currentHour.toString().padStart(2, '0');
-        const formattedMinute = currentMinute.toString().padStart(2, '0');
-        slots.push(`${formattedHour}:${formattedMinute}`);
-
-        // Move to next 30-minute slot
-        currentMinute += 30;
-        if (currentMinute >= 60) {
-            currentHour += 1;
-            currentMinute -= 60;
-        }
-    }
-
-    return slots;
-}

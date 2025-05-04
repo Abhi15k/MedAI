@@ -2,11 +2,12 @@ import express from 'express';
 import { authenticateUser, authorizeRoles } from '../middleware/auth.js';
 import { getDoctors } from '../controllers/appointmentController/getDoctors.js';
 import { getDoctorAvailability } from '../controllers/appointmentController/getDoctorAvailability.js';
-import { createAppointment } from '../controllers/appointmentController/createAppointment.js';
+import { bookAppointment } from '../controllers/appointmentController/bookAppointment.js';
 import { getPatientAppointments } from '../controllers/appointmentController/getPatientAppointments.js';
 import { getDoctorAppointments } from '../controllers/appointmentController/getDoctorAppointments.js';
-import { updateAppointmentStatus } from '../controllers/appointmentController/updateAppointmentStatus.js';
+import { manageAppointmentStatus } from '../controllers/appointmentController/manageAppointmentStatus.js';
 import Appointment from '../models/appointmentModel.js';
+import Doctor from '../models/doctorModel.js';
 
 const AppointmentRouter = express.Router();
 
@@ -17,7 +18,7 @@ AppointmentRouter.get('/doctors', getDoctors);
 AppointmentRouter.get('/doctors/:id/availability', getDoctorAvailability);
 
 // Book a new appointment
-AppointmentRouter.post('/appointments', authenticateUser, createAppointment);
+AppointmentRouter.post('/appointments', authenticateUser, bookAppointment);
 
 // Get patient's appointments
 AppointmentRouter.get('/appointments/patient', authenticateUser, getPatientAppointments);
@@ -29,9 +30,16 @@ AppointmentRouter.get('/appointments/doctor', authenticateUser, authorizeRoles([
 AppointmentRouter.get('/appointments', authenticateUser, authorizeRoles(['admin']), async (req, res) => {
     try {
         const appointments = await Appointment.find()
-            .populate('doctor', 'name email doctorProfile.specialization')
+            .populate({
+                path: 'doctor',
+                select: 'specialty',
+                populate: {
+                    path: 'user',
+                    select: 'name email'
+                }
+            })
             .populate('patient', 'name email')
-            .sort({ date: -1, timeSlot: 1 });
+            .sort({ date: 1, timeSlot: 1 });
 
         res.status(200).json({
             success: true,
@@ -48,15 +56,22 @@ AppointmentRouter.get('/appointments', authenticateUser, authorizeRoles(['admin'
 });
 
 // Accept or reject appointment
-AppointmentRouter.patch('/appointments/:id/status', authenticateUser, authorizeRoles(['doctor', 'admin']), updateAppointmentStatus);
+AppointmentRouter.patch('/appointments/:id/status', authenticateUser, authorizeRoles(['doctor', 'admin']), manageAppointmentStatus);
 
 // Get specific appointment details
 AppointmentRouter.get('/appointments/:id', authenticateUser, async (req, res) => {
     try {
         const { id } = req.params;
         const appointment = await Appointment.findById(id)
-            .populate('doctor', 'name email doctorProfile.specialization profileImage')
-            .populate('patient', 'name email patientProfile profileImage');
+            .populate({
+                path: 'doctor',
+                select: 'specialty consultationFee',
+                populate: {
+                    path: 'user',
+                    select: 'name email'
+                }
+            })
+            .populate('patient', 'name email');
 
         if (!appointment) {
             return res.status(404).json({
@@ -66,18 +81,21 @@ AppointmentRouter.get('/appointments/:id', authenticateUser, async (req, res) =>
         }
 
         // Authorization check
-        const userId = req.user.id;
-        const userRole = req.user.role;
-
-        if (
-            userRole !== 'admin' &&
-            appointment.doctor._id.toString() !== userId &&
-            appointment.patient._id.toString() !== userId
-        ) {
+        if (req.user.role === 'patient' && !appointment.patient._id.equals(req.user.id)) {
             return res.status(403).json({
                 success: false,
-                message: 'Not authorized to view this appointment'
+                message: 'Unauthorized: You can only view your own appointments'
             });
+        }
+
+        if (req.user.role === 'doctor') {
+            const doctor = await Doctor.findOne({ user: req.user.id });
+            if (!doctor || !appointment.doctor._id.equals(doctor._id)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Unauthorized: You can only view your own appointments'
+                });
+            }
         }
 
         res.status(200).json({
@@ -95,7 +113,7 @@ AppointmentRouter.get('/appointments/:id', authenticateUser, async (req, res) =>
 });
 
 // Cancel appointment
-AppointmentRouter.delete('/appointments/:id', authenticateUser, async (req, res) => {
+AppointmentRouter.patch('/appointments/:id/cancel', authenticateUser, async (req, res) => {
     try {
         const { id } = req.params;
         const appointment = await Appointment.findById(id);
@@ -107,18 +125,25 @@ AppointmentRouter.delete('/appointments/:id', authenticateUser, async (req, res)
             });
         }
 
-        // Authorization check (only patient who booked or admin can cancel)
-        const userId = req.user.id;
-        const userRole = req.user.role;
-
-        if (userRole !== 'admin' && appointment.patient.toString() !== userId) {
+        // Authorization check - only the patient can cancel their appointment
+        if (req.user.role === 'patient' && !appointment.patient.equals(req.user.id)) {
             return res.status(403).json({
                 success: false,
-                message: 'Not authorized to cancel this appointment'
+                message: 'Unauthorized: You can only cancel your own appointments'
             });
         }
 
-        // Update status to cancelled
+        // Admin or doctor can also cancel
+        if (req.user.role === 'doctor') {
+            const doctor = await Doctor.findOne({ user: req.user.id });
+            if (!doctor || !appointment.doctor.equals(doctor._id)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Unauthorized: You can only cancel your own appointments'
+                });
+            }
+        }
+
         appointment.status = 'cancelled';
         await appointment.save();
 

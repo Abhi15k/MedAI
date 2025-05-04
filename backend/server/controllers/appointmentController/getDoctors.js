@@ -1,36 +1,53 @@
-import Appointment from '../../models/appointmentModel.js';
-import User from '../../models/user.js';
-
-// Get all doctors with optional filters
+import Doctor from '../../models/doctorModel.js';
+import User from '../../models/userModel.js';
 
 export const getDoctors = async (req, res) => {
     try {
-        const { specialty, name, date } = req.query;
+        const { specialty, name } = req.query;
+        let query = {};
 
-        // Build query filter
-        const filter = { role: 'doctor', isActive: true };
-
-        // Add specialty filter if provided
+        // Apply specialty filter if provided
         if (specialty) {
-            filter['doctorProfile.specialization'] = { $regex: specialty, $options: 'i' };
+            query.specialty = specialty;
         }
 
-        // Add name filter if provided
+        // Find doctors with optional filters
+        const doctors = await Doctor.find(query).populate({
+            path: 'user',
+            select: 'name email role'
+        });
+
+        // Apply name filter if provided (case-insensitive)
+        let filteredDoctors = doctors;
         if (name) {
-            filter.name = { $regex: name, $options: 'i' };
+            const nameRegex = new RegExp(name, 'i');
+            filteredDoctors = doctors.filter(doctor =>
+                nameRegex.test(doctor.user.name)
+            );
         }
 
-        // Find doctors matching the criteria
-        const doctors = await User.find(filter).select(
-            'name email doctorProfile profileImage'
-        );
+        // Format response
+        const formattedDoctors = filteredDoctors.map(doctor => ({
+            id: doctor._id,
+            userId: doctor.user._id,
+            name: doctor.user.name,
+            email: doctor.user.email,
+            specialties: [doctor.specialty], // Convert single specialty to array for frontend compatibility
+            qualifications: doctor.qualifications || [],
+            experience: doctor.experience,
+            bio: doctor.bio,
+            consultationFee: doctor.consultationFee,
+            rating: doctor.ratings?.average || 0,
+            reviewCount: doctor.ratings?.count || 0
+        }));
 
         res.status(200).json({
             success: true,
-            message: 'Doctors retrieved successfully',
-            data: doctors
+            count: formattedDoctors.length,
+            data: formattedDoctors
         });
     } catch (error) {
+        console.error('Error fetching doctors:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching doctors',
@@ -38,3 +55,5 @@ export const getDoctors = async (req, res) => {
         });
     }
 };
+
+export default getDoctors;
