@@ -7,17 +7,7 @@ import connectDB from "./config/db.js";
 import AppointmentRouter from "./routes/appointment.js";
 import PredictionRouter from "./routes/prediction.js";
 import ReminderRouter from "./routes/reminder.js";
-import SummarizeRouter from "./routes/summarizer.js";
-import mongoose from "mongoose";
-import { fileURLToPath } from 'url';
-import path from 'path';
-import authRouter from "./routes/authRoute.js";
-import cookieParser from "cookie-parser";
-import './services/cronJob.js';
-
-// Resolve __dirname for ES module compatibility
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+ main
 
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -48,8 +38,7 @@ app.use(cors({
 // Middleware setup
 app.use(express.json()); // Middleware for parsing JSON data
 app.use(morgan("dev"));   // Logging middleware
-app.use(cookieParser()); // Middleware for parsing cookies
-app.use(express.urlencoded({ extended: true })); // Middleware for parsing URL-encoded data
+main
 
 // Routes
 app.use("/api/appointment", AppointmentRouter);

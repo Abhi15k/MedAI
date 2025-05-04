@@ -1,1 +1,4 @@
 node_modules/
+
+backend/server/utils/medai-87fda-firebase-adminsdk-fbsvc-77b51b45a0.json
+backend/server/utils/*.json
