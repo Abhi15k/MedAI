@@ -3,21 +3,14 @@ import Appointment from '../../models/appointmentModel.js';
 
 export const getDoctorAppointments = async (req, res) => {
     try {
-        const userId = req.user.id;
+        // Get the user ID from the authenticated user object
+        const userId = req.user.user._id;
+        console.log("Fetching appointments for doctor with user ID:", userId);
         const { status, date } = req.query;
 
-        // Find the doctor profile associated with this user
-        const doctor = await Doctor.findOne({ user: userId });
-
-        if (!doctor) {
-            return res.status(404).json({
-                success: false,
-                message: 'Doctor profile not found'
-            });
-        }
-
-        // Create base query
-        const query = { doctor: doctor._id };
+        // Since appointments reference doctor as User ID, not Doctor ID
+        // We can directly query appointments by user ID
+        const query = { doctor: userId };
 
         // Add status filter if provided
         if (status) {
@@ -37,8 +30,10 @@ export const getDoctorAppointments = async (req, res) => {
 
         // Find appointments with populated patient details
         const appointments = await Appointment.find(query)
-            .populate('patient', 'name email')
-            .sort({ date: 1, timeSlot: 1 });
+            .populate('patient', 'name email profileImage')
+            .sort({ date: 1 });
+
+        console.log(`Found ${appointments.length} appointments for doctor user ID ${userId}`);
 
         res.status(200).json({
             success: true,

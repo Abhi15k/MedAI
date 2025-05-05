@@ -9,22 +9,47 @@ export default function Reminder() {
     const { user, axiosInstance } = useContext(AuthContext);
     const [reminders, setReminders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [connectionError, setConnectionError] = useState(false);
     const [editingReminder, setEditingReminder] = useState(null);
 
     useEffect(() => {
-        fetchReminders();
+        if (user?.user?._id) {
+            fetchReminders();
+        } else {
+            setLoading(false);
+        }
     }, [user?.user?._id, axiosInstance]);
 
     const fetchReminders = async () => {
-        if (!user?.user?._id) return;
+        if (!user?.user?._id) {
+            console.warn("Cannot fetch reminders - user ID is not available");
+            setLoading(false);
+            return;
+        }
 
         setLoading(true);
+        setConnectionError(false);
+
         try {
+            console.log(`Attempting to fetch reminders for user: ${user.user._id}`);
             const response = await axiosInstance.get(`/reminder/${user.user._id}`);
+            console.log("Reminders API response:", response.data);
             setReminders(response.data || []);
         } catch (error) {
             console.error('Error fetching reminders:', error);
-            toast.error('Failed to load reminders');
+
+            if (error.response) {
+                console.error(`Server responded with status: ${error.response.status}`);
+                console.error('Response data:', error.response.data);
+                console.error('Response headers:', error.response.headers);
+            } else if (error.request) {
+                console.error('No response received from server');
+                setConnectionError(true);
+            } else {
+                console.error('Error setting up request:', error.message);
+            }
+
+            toast.error('Failed to load reminders - Please check server connection');
         } finally {
             setLoading(false);
         }
@@ -36,7 +61,6 @@ export default function Reminder() {
 
     const handleEdit = (reminder) => {
         setEditingReminder(reminder);
-        // This will trigger the dialog to open with the reminder data
     };
 
     const handleDelete = async (reminderId) => {
@@ -123,6 +147,20 @@ export default function Reminder() {
                                         <tr>
                                             <td colSpan={7} className="text-center py-8">
                                                 Loading reminders...
+                                            </td>
+                                        </tr>
+                                    ) : connectionError ? (
+                                        <tr>
+                                            <td colSpan={7} className="text-center py-8 text-red-600">
+                                                Could not connect to the reminder service.
+                                                <div className="mt-2">
+                                                    <button
+                                                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                                                        onClick={fetchReminders}
+                                                    >
+                                                        Try Again
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ) : reminders.length > 0 ? (

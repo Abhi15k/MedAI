@@ -24,13 +24,18 @@ const app = express();
 // Middleware setup
 app.use(express.json()); // Middleware for parsing JSON data
 app.use(morgan("dev"));   // Logging middleware
-app.use(cors({
-  origin: "http://localhost:5173", // Allow requests from this origin
-  credentials: true, // Allow credentials
-})); 
-app.use(cookieParser()); // Middleware for parsing cookies
-app.use(express.urlencoded({ extended: true })); // Middleware for parsing URL-encoded data
 
+// Enhanced CORS configuration
+app.use(cors({
+  origin: process.env.CLIENT_URL || "http://localhost:5173", // Use environment variable if available
+  credentials: true, // Critical for cookies to work cross-origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Cookie parser with a secret key for signed cookies
+app.use(cookieParser(process.env.COOKIE_SECRET)); // Use a secret for signed cookies
+app.use(express.urlencoded({ extended: true })); // Middleware for parsing URL-encoded data
 
 // Routes
 app.use("/api/appointment", AppointmentRouter);

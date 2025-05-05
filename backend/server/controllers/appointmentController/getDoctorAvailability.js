@@ -15,8 +15,8 @@ export const getDoctorAvailability = async (req, res) => {
 
         // Parse the requested date
         const requestedDate = new Date(date);
-        // Get lowercase day name (monday, tuesday, etc.) to match our schema
-        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        // Get day name (Monday, Tuesday, etc.) to match our schema
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayOfWeek = days[requestedDate.getDay()];
 
         // Get doctor's regular availability for that day
@@ -28,8 +28,21 @@ export const getDoctorAvailability = async (req, res) => {
             });
         }
 
-        // Get doctor's scheduled availability for that day
-        const doctorAvailability = doctor.availability[dayOfWeek] || [];
+        // Find the availability data for the requested day from availableSlots array
+        const daySchedule = doctor.availableSlots?.find(slot => slot.day === dayOfWeek);
+        const doctorAvailability = [];
+
+        // If doctor has slots for this day, convert them to the format expected by the frontend
+        if (daySchedule && daySchedule.slots && daySchedule.slots.length > 0) {
+            daySchedule.slots.forEach(slotStr => {
+                // Parse the slot string format (e.g., "09:00-09:30")
+                const [startTime, endTime] = slotStr.split('-');
+                if (startTime && endTime) {
+                    doctorAvailability.push({ startTime, endTime });
+                }
+            });
+        }
+
         if (doctorAvailability.length === 0) {
             return res.status(200).json({
                 success: true,
@@ -54,41 +67,11 @@ export const getDoctorAvailability = async (req, res) => {
             status: { $nin: ['cancelled', 'rejected'] }
         });
 
-        // Create available time slots (30-minute intervals)
-        const availableSlots = [];
-
-        doctorAvailability.forEach(slot => {
-            const [startHour, startMinute] = slot.startTime.split(':').map(Number);
-            const [endHour, endMinute] = slot.endTime.split(':').map(Number);
-
-            let currentTime = startHour * 60 + startMinute;
-            const endTime = endHour * 60 + endMinute;
-
-            // Create 30-minute slots
-            while (currentTime + 30 <= endTime) {
-                const slotStartHour = Math.floor(currentTime / 60);
-                const slotStartMinute = currentTime % 60;
-
-                const slotEndHour = Math.floor((currentTime + 30) / 60);
-                const slotEndMinute = (currentTime + 30) % 60;
-
-                const startTimeString = `${slotStartHour.toString().padStart(2, '0')}:${slotStartMinute.toString().padStart(2, '0')}`;
-                const endTimeString = `${slotEndHour.toString().padStart(2, '0')}:${slotEndMinute.toString().padStart(2, '0')}`;
-
-                // Check if this slot is already booked
-                const isBooked = bookedAppointments.some(appointment =>
-                    appointment.timeSlot.startTime === startTimeString
-                );
-
-                if (!isBooked) {
-                    availableSlots.push({
-                        startTime: startTimeString,
-                        endTime: endTimeString
-                    });
-                }
-
-                currentTime += 30; // Move to next 30-minute slot
-            }
+        // Filter out already booked slots
+        const availableSlots = doctorAvailability.filter(slot => {
+            return !bookedAppointments.some(appointment =>
+                appointment.timeSlot.startTime === slot.startTime
+            );
         });
 
         res.status(200).json({

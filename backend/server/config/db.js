@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-dotenv.config({path: 'backend/server/.env'}); // Load environment variables from .env file
+dotenv.config({ path: 'backend/server/.env' }); // Load environment variables from .env file
 
 const mongoURI = process.env.MONGO_URI;
 

@@ -22,24 +22,31 @@ export const getDoctors = async (req, res) => {
         if (name) {
             const nameRegex = new RegExp(name, 'i');
             filteredDoctors = doctors.filter(doctor =>
-                nameRegex.test(doctor.user.name)
+                nameRegex.test(doctor.user?.name)
             );
         }
 
-        // Format response
-        const formattedDoctors = filteredDoctors.map(doctor => ({
-            id: doctor._id,
-            userId: doctor.user._id,
-            name: doctor.user.name,
-            email: doctor.user.email,
-            specialties: [doctor.specialty], // Convert single specialty to array for frontend compatibility
-            qualifications: doctor.qualifications || [],
-            experience: doctor.experience,
-            bio: doctor.bio,
-            consultationFee: doctor.consultationFee,
-            rating: doctor.ratings?.average || 0,
-            reviewCount: doctor.ratings?.count || 0
-        }));
+        // Format response with consistent structure
+        const formattedDoctors = filteredDoctors.map(doctor => {
+            // Handle potentially missing user data
+            const userData = doctor.user || {};
+
+            return {
+                id: doctor._id,
+                userId: userData._id || null,
+                name: userData.name || 'Unknown Doctor',
+                email: userData.email || '',
+                specialties: Array.isArray(doctor.specialty) ?
+                    doctor.specialty :
+                    (doctor.specialty ? [doctor.specialty] : []),
+                qualifications: doctor.qualifications || [],
+                experience: doctor.experience || 0,
+                bio: doctor.bio || '',
+                consultationFee: doctor.consultationFee || 0,
+                rating: doctor.ratings?.average || 0,
+                reviewCount: doctor.ratings?.count || 0
+            };
+        });
 
         res.status(200).json({
             success: true,

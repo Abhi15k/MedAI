@@ -63,15 +63,16 @@ AppointmentRouter.get('/appointments/:id', authenticateUser, async (req, res) =>
     try {
         const { id } = req.params;
         const appointment = await Appointment.findById(id)
+            // Enhanced populate for doctor with more detailed information
             .populate({
                 path: 'doctor',
-                select: 'specialty consultationFee',
+                select: 'specialty consultationFee experience bio qualifications availableSlots ratings',
                 populate: {
                     path: 'user',
-                    select: 'name email'
+                    select: 'name email profileImage'
                 }
             })
-            .populate('patient', 'name email');
+            .populate('patient', 'name email profileImage');
 
         if (!appointment) {
             return res.status(404).json({
@@ -98,10 +99,22 @@ AppointmentRouter.get('/appointments/:id', authenticateUser, async (req, res) =>
             }
         }
 
+        // Transform the appointment to ensure doctor name is directly accessible
+        const appointmentObj = appointment.toObject();
+
+        // Add doctorName field for easy access on the frontend
+        if (appointmentObj.doctor && appointmentObj.doctor.user) {
+            appointmentObj.doctorName = appointmentObj.doctor.user.name;
+            appointmentObj.doctorEmail = appointmentObj.doctor.user.email;
+            appointmentObj.doctorProfileImage = appointmentObj.doctor.user.profileImage;
+            // Add specialty as a direct property for easier access
+            appointmentObj.doctorSpecialty = appointmentObj.doctor.specialty;
+        }
+
         res.status(200).json({
             success: true,
             message: 'Appointment retrieved successfully',
-            data: appointment
+            data: appointmentObj
         });
     } catch (error) {
         res.status(500).json({

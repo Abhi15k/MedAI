@@ -36,11 +36,11 @@ try {
 }
 
 // If no MongoDB URI found in .env, use a default
-if (!MONGODB_URI) {
-    // Hardcoded MongoDB Atlas connection string from your .env file as backup
-    MONGODB_URI = 'mongodb+srv://AbhishekKulal:sFLBupky00hrA6ex@abhishek.tdc4k10.mongodb.net/medconnect';
-    console.log('Using hardcoded MongoDB Atlas connection string as fallback');
-}
+// if (!MONGODB_URI) {
+//     // Hardcoded MongoDB Atlas connection string from your .env file as backup
+//    
+//     console.log('Using hardcoded MongoDB Atlas connection string as fallback');
+// }
 
 console.log(`Attempting to connect to MongoDB at: ${MONGODB_URI.substring(0, 25)}...`);
 

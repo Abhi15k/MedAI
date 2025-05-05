@@ -8,7 +8,7 @@ const appointmentSchema = new mongoose.Schema({
     },
     doctor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Doctor',
+        ref: 'User',  // Changed from 'Doctor' to 'User' to match the controller
         required: true
     },
     date: {
@@ -16,20 +16,27 @@ const appointmentSchema = new mongoose.Schema({
         required: true
     },
     timeSlot: {
-        type: String,
-        required: true
+        startTime: {
+            type: String,
+            required: true
+        },
+        endTime: {
+            type: String,
+            required: true
+        }
     },
     reason: {
         type: String,
         required: true
     },
+    notes: {   // Renamed from 'note' to 'notes' to match frontend
+        type: String,
+        default: ""
+    },
     status: {
         type: String,
         enum: ['pending', 'accepted', 'rejected', 'cancelled'],
         default: 'pending'
-    },
-    note: {
-        type: String
     },
     createdAt: {
         type: Date,
