@@ -1,0 +1,23 @@
+<div class="container">
+  <div class="header">
+    <h1>📰 Angular CRUD Demo (Posts)</h1>
+    <button class="btn btn-primary" (click)="onCreateNew()">Create New Post</button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading posts...</div>
+  
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div *ngIf="!loading && !error" class="post-list">
+    <div *ngFor="let post of posts" class="post-item">
+      <div class="post-content">
+        <h3>{{ post.title }}</h3>
+        <p>{{ post.body }}</p>
+      </div>
+      <div class="post-actions">
+        <button class="btn btn-edit" (click)="onEdit(post.id)">Edit</button>
+        <button class="btn btn-delete" (click)="onDelete(post.id)">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
